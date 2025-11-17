@@ -88,7 +88,7 @@ def get_recipes_html(session: SessionDep, tag: str = "all"):
     results = session.exec(statement).all()
     
     if not results:
-        return ""
+        return gen_html.generate_blank()
 
     html = gen_html.generate_recipes(results)
 

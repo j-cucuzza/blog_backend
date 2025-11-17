@@ -31,10 +31,8 @@ def generate_markdown(string: str):
     return markdown.markdown(string, extensions=['tables'])
 
 def generate_tags(tags: list[tag_model.Tag]):
-    gen_html = """
-        <option value="all" selected>Select Filter</option>
-    """
-
+    gen_html = ""
+    
     for tag in tags:
         gen_html += f"""
             <option value={tag.id}>{tag.name}</option>
@@ -52,6 +50,66 @@ def generate_cuisines(cuisines: list[cuisine_model.Cuisine]):
             <option value={cuisine.id}>{cuisine.name}</option>
         """
     
+    return gen_html
+
+def generate_blank():
+    gen_html = ""
+
+    gen_html +=f"""
+        <div class="cell">
+            <div class="card" style="height: 100%;">
+                <div class="card-image">
+                    <figure class="image is-4by3">
+                    <img
+                        style="object-fit: cover"
+                        src="/static/img/image-not-found.jpg"
+                        alt="image"
+                    />
+                    </figure>
+                </div>
+                <div class="card-content">
+                    <div class="media">
+                    <div class="media-content" style="min-height: 5rem">
+                        <p class="title is-4">NONE FOUND</p>
+                        <p class="subtitle is-6"><span class="tag is-warning">NONE</span></p>
+                    </div>
+                    </div>
+
+                    <div class="content" style="max-height: 8rem; min-height: 6rem;" >
+                    <nav class="level is-mobile">
+                        <div class="level-item has-text-centered">
+                            <div>
+                                <p class="title is-5">0</p>
+                                <p class="title is-6">SERVINGS</p>
+                            </div>
+                        </div>
+                        <div class="level-item has-text-centered">
+                            <div>
+                                <p class="title is-5">0</p>
+                                <p class="title is-6">CALORIES</p>
+                            </div>
+                        </div>
+                        <div class="level-item has-text-centered">
+                            <div>
+                                <p class="title is-5">0g</p>
+                                <p class="title is-6">PROTEIN</p>
+                            </div>
+                        </div>
+                    </nav>
+                    <br />
+                    </div>
+                    
+                    <nav class="level">
+                        <div class="level-item">
+                            <a href="">
+                                <button disabled class="button is-primary">View Recipe</button>
+                            </a>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        """
     return gen_html
 
 def generate_recipes(recipes: list[recipe_model.Recipe]):
