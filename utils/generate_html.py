@@ -136,7 +136,7 @@ def generate_recipes(recipes: list[recipe_model.Recipe]):
                             <div class="media">
                             <div class="media-content" style="min-height: 5rem">
                                 <p class="title is-4">{recipe.name}</p>
-                                <p class="subtitle is-6"><span class="tag is-warning">{recipe.tag.name}</span></p>
+                                <p class="subtitle is-6" has-text-light><span class="tag is-primary" has-text-light>{recipe.tag.name}</span></p>
                             </div>
                             </div>
 
@@ -289,8 +289,8 @@ def generate_recipe(recipe: recipe_model.Recipe):
                 <div class="card-header-title">
                     <p class="title is-4">{recipe.name}</p>
                 </div>
-                <div class="card-header-icon">
-                    <span class="tag is-warning">{recipe.tag.name}</span>
+                <div class="card-header-icon" has-text-light>
+                    <span class="tag is-primary" has-text-light>{recipe.tag.name}</span>
                 </div>
             </div>
             <div class="card-content">
@@ -316,14 +316,14 @@ def generate_recipe(recipe: recipe_model.Recipe):
                                 </div>
                     </nav>
                     <br />
-                    <div class="columns is-centered">
+                    <div class="columns is-centered is-desktop">
                         <div class="column is-narrow">
                         <span class="title is-6">Ingredients</span>
                         <br />
                         <br />
                         {ingredients}
                         </div>
-                        <div class="column is-two-thirds">
+                        <div class="column">
                         <span class="title is-6">Instructions</span>
                         <br />
                         <br />

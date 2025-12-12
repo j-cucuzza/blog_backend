@@ -1,6 +1,7 @@
 from typing import Annotated
 from sqlmodel import Session, select
-from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func, or_
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from database import SessionDep, oauth2_scheme
 
@@ -41,6 +42,9 @@ def read_recipes(
     limit: Annotated[int, Query(le=100)] = 100,
 ):
     recipes = session.exec(select(recipe_model.Recipe).order_by(recipe_model.Recipe.name).offset(offset).limit(limit)).all()
+
+    if not recipes:
+        raise HTTPException(status_code=404, detail="Recipes not found")
     return recipes
 
 @router.get("/{recipe_id}", response_model=recipe_model.RecipePublic)
@@ -50,7 +54,7 @@ def read_recipe(recipe_id: int, session: SessionDep):
         raise HTTPException(status_code=404, detail="Recipe not found")
     return recipe
 
-@router.patch("/{recipe_id}", response_model=recipe_model.RecipePublic)
+@router.post("/edit/{recipe_id}", response_model=recipe_model.RecipePublic)
 def update_recipe(token: Annotated[str, Depends(oauth2_scheme)],
     recipe_id: int,
     recipe: recipe_model.RecipeUpdate,
@@ -97,20 +101,49 @@ def get_recipes_html(session: SessionDep, tag: str = "all"):
 @router.get("/one/html", response_class=HTMLResponse)
 def get_recipe_html(session: SessionDep, id: int = 0):
     statement = select(recipe_model.Recipe).where(recipe_model.Recipe.id == int(id))
-    recipe = session.exec(statement).all()[0]
-
     html = ""
+    try:
+        recipe = session.exec(statement).all()[0]
+        html = gen_html.generate_recipe(recipe)
+    except:
+        html = gen_html.generate_blank()
     
-    if not recipe:
-        html = gen_html.generate_error_html()
-        return html
-    
-    html = gen_html.generate_recipe(recipe)
 
     response = HTMLResponse(content=html)
     response.headers["X-Page-Title"] = recipe.name
     response.headers["X-Page-Description"] = f"{recipe.servings} servings, {recipe.calories} calories, {recipe.protein}g protein"
     return response
+
+@router.get("/search/", response_model=list[recipe_model.RecipePublicWithTag])
+def get_recipe_search(session: SessionDep, query: str = ""):
+    if query == "":
+        statement = select(recipe_model.Recipe).order_by(recipe_model.Recipe.name)
+    else:
+        statement = select(recipe_model.Recipe).where(or_(
+            func.lower(recipe_model.Recipe.name).contains(query.lower()),
+            func.lower(recipe_model.Recipe.ingredients).contains(query.lower())))
+    results = session.exec(statement).all()
+
+    if not results:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+
+    return results
+
+@router.get("/search/html", response_class=HTMLResponse)
+def get_search_html(session: SessionDep, query: str = ""):
+    if query == "":
+        statement = select(recipe_model.Recipe).order_by(recipe_model.Recipe.name)
+    else:
+        statement = select(recipe_model.Recipe).where(or_(
+            func.lower(recipe_model.Recipe.name).contains(query.lower()),
+            func.lower(recipe_model.Recipe.ingredients).contains(query.lower())))
+    results = session.exec(statement).all()
+
+    if not results:
+        return gen_html.generate_blank()
+    
+    return gen_html.generate_recipes(results)
 
 ########
 # TAGS #
