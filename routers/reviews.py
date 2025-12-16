@@ -50,7 +50,7 @@ def read_review(review_id: int, session: SessionDep):
         raise HTTPException(status_code=404, detail="Review not found")
     return review
 
-@router.patch("/{review_id}", response_model=review_model.ReviewPublic)
+@router.post("/{review_id}", response_model=review_model.ReviewPublic)
 def update_review(token: Annotated[str, Depends(oauth2_scheme)],
     review_id: int,
     review: review_model.ReviewUpdate,
