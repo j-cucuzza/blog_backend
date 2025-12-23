@@ -7,6 +7,7 @@ class ReviewBase(SQLModel):
     visited: bool = Field(default=False, index=True)
     rating: int | None = Field(default=None, index=True)
     notes: str | None = Field(default=None)
+    neighborhood: str = Field(default="", index=True) 
 
 class Review(ReviewBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -26,6 +27,7 @@ class ReviewUpdate(ReviewBase):
     rating: int | None = None
     notes: str | None = None
     cuisine_id: int | None = None
+    neighborhood: str | None = None
 
 class ReviewPublicWithCuisine(ReviewPublic):
     cuisine: cuisine_model.CuisinePublic | None = None

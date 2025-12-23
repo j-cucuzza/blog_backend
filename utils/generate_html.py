@@ -47,7 +47,7 @@ def generate_cuisines(cuisines: list[cuisine_model.Cuisine]):
 
     for cuisine in cuisines:
         gen_html += f"""
-            <option value={cuisine.id}>{cuisine.name}</option>
+            <option value={cuisine.id}>{cuisine.name.capitalize()}</option>
         """
     
     return gen_html
@@ -241,7 +241,7 @@ def generate_reviews(reviews: list[review_model.Review]):
                                     </div>
                                 </nav>
                                 <div class="has-text-centered">
-                                    <span class="tag is-primary"><span class="title is-6">{review.cuisine.name.capitalize()}</span></span>
+                                    
                                 </div>
                             <br />
                             <p>
@@ -249,6 +249,14 @@ def generate_reviews(reviews: list[review_model.Review]):
                             </p>
                             </div>
                         </div>
+                        <footer class="card-footer">
+                            <p class="card-footer-item">
+                                <span class="tag is-primary"><span class="title is-6">{review.neighborhood}</span></span>
+                            </p>
+                            <p class="card-footer-item">
+                                <span class="tag is-primary"><span class="title is-6">{review.cuisine.name.capitalize()}</span></span>
+                            </p>
+                        </footer>
                     </div>
                 </div>
             """
@@ -267,7 +275,7 @@ def generate_blank_review():
                                 <div>
                                     <div class="icon-text">
                                         <span class="title is-6">
-                                            <span key={i} class="icon has-text-danger">
+                                            <span class="icon has-text-danger">
                                                 <i class="fa-solid fa-ban"></i>
                                             </span>
                                         </span>
@@ -290,7 +298,7 @@ def generate_blank_review():
                                 </div>
                             </nav>
                             <div class="has-text-centered">
-                                <span class="tag is-primary"><span class="title is-6">{review.cuisine.name.capitalize()}</span></span>
+                                <span class="tag is-primary"><span class="title is-6">No Review Found</span></span>
                             </div>
                         <br />
                         <p>

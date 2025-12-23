@@ -1,6 +1,6 @@
 from typing import Annotated
 from sqlmodel import Session, select
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import HTMLResponse, JSONResponse
 from database import SessionDep, oauth2_scheme
@@ -54,9 +54,12 @@ def read_review(review_id: int, session: SessionDep):
 @router.get("/search/", response_model=list[review_model.ReviewPublicWithCuisine])
 def get_reviews(session: SessionDep, query: str = ""):
     if query == "":
-        statement = select(review_model.Review).order_by(review_model.Review.name)
+        statement = select(review_model.Review).order_by(review_model.Review.visited.desc(), 
+            review_model.Review.rating.desc(), review_model.Review.name)
     else:
-        statement = select(review_model.Review).where(func.lower(review_model.Review.name).contains(query.lower()))
+        statement = select(review_model.Review).where(
+            or_(func.lower(review_model.Review.name).contains(query.lower()),
+                func.lower(review_model.Review.neighborhood).contains(query.lower())))
     results = session.exec(statement).all()
 
     if not results:
@@ -67,9 +70,12 @@ def get_reviews(session: SessionDep, query: str = ""):
 @router.get("/search/html", response_class=HTMLResponse)
 def get_reviews_search(session: SessionDep, query: str = ""):
     if query == "":
-        statement = select(review_model.Review).order_by(review_model.Review.name)
+        statement = select(review_model.Review).order_by(review_model.Review.visited.desc(), 
+            review_model.Review.rating.desc(), review_model.Review.name)
     else:
-        statement = select(review_model.Review).where(func.lower(review_model.Review.name).contains(query.lower()))
+        statement = select(review_model.Review).where(
+            or_(func.lower(review_model.Review.name).contains(query.lower()),
+                func.lower(review_model.Review.neighborhood).contains(query.lower())))
     results = session.exec(statement).all()
 
     if not results:
