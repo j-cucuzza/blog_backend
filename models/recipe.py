@@ -8,6 +8,7 @@ class RecipeBase(SQLModel):
     protein: int | None = Field(default=None, index=True)
     ingredients: str | None = Field(default=None)
     instructions: str | None = Field(default=None)
+    hidden: bool = Field(default=False)
 
 class Recipe(RecipeBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -28,6 +29,7 @@ class RecipeUpdate(RecipeBase):
     tag_id: int | None = None
     ingredients: str | None = None
     instructions: str | None = None
+    hidden: bool | None = None
 
 class RecipePublicWithTag(RecipePublic):
     tag: tag_model.TagPublic | None = None

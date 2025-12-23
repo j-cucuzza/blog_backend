@@ -36,12 +36,9 @@ def create_recipe(token: Annotated[str, Depends(oauth2_scheme)],
     return db_recipe
 
 @router.get("/all/", response_model=list[recipe_model.RecipePublicWithTag])
-def read_recipes(
-    session: SessionDep,
-    offset: int = 0,
-    limit: Annotated[int, Query(le=100)] = 100,
-):
-    recipes = session.exec(select(recipe_model.Recipe).order_by(recipe_model.Recipe.name).offset(offset).limit(limit)).all()
+def read_recipes(session: SessionDep):
+    recipes = session.exec(
+        select(recipe_model.Recipe).order_by(recipe_model.Recipe.name))
 
     if not recipes:
         raise HTTPException(status_code=404, detail="Recipes not found")
@@ -86,13 +83,15 @@ def delete_recipe(token: Annotated[str, Depends(oauth2_scheme)],
 @router.get("/all/html", response_class=HTMLResponse)
 def get_recipes_html(session: SessionDep, tag: str = "all"):
     if tag == "all":
-        statement = select(recipe_model.Recipe).order_by(recipe_model.Recipe.name)
+        statement = select(recipe_model.Recipe).where(recipe_model.Recipe.hidden == False).order_by(recipe_model.Recipe.name)
     else:
-        statement = select(recipe_model.Recipe).order_by(recipe_model.Recipe.name).where(recipe_model.Recipe.tag_id == int(tag))
+        statement = select(recipe_model.Recipe).order_by(recipe_model.Recipe.name).where(
+            recipe_model.Recipe.tag_id == int(tag),
+            recipe_model.Recipe.hidden == False)
     results = session.exec(statement).all()
     
     if not results:
-        return gen_html.generate_blank()
+        return gen_html.generate_blank_recipe()
 
     html = gen_html.generate_recipes(results)
 
@@ -106,7 +105,7 @@ def get_recipe_html(session: SessionDep, id: int = 0):
         recipe = session.exec(statement).all()[0]
         html = gen_html.generate_recipe(recipe)
     except:
-        html = gen_html.generate_blank()
+        html = gen_html.generate_blank_recipe()
     
 
     response = HTMLResponse(content=html)
@@ -117,15 +116,18 @@ def get_recipe_html(session: SessionDep, id: int = 0):
 @router.get("/search/", response_model=list[recipe_model.RecipePublicWithTag])
 def get_recipe_search(session: SessionDep, query: str = ""):
     if query == "":
-        statement = select(recipe_model.Recipe).order_by(recipe_model.Recipe.name)
+        statement = select(recipe_model.Recipe).where(recipe_model.Recipe.hidden == False).order_by(recipe_model.Recipe.name)
     else:
-        statement = select(recipe_model.Recipe).where(or_(
-            func.lower(recipe_model.Recipe.name).contains(query.lower()),
-            func.lower(recipe_model.Recipe.ingredients).contains(query.lower())))
+        statement = select(recipe_model.Recipe).where(
+            recipe_model.Recipe.hidden == False,
+            or_(
+                func.lower(recipe_model.Recipe.name).contains(query.lower()),
+                func.lower(recipe_model.Recipe.ingredients).contains(query.lower())
+            ))
     results = session.exec(statement).all()
 
     if not results:
-        raise HTTPException(status_code=404, detail="Recipe(s) not found")
+        raise HTTPException(status_code=404, detail="Recipe not found")
 
 
     return results
@@ -133,11 +135,14 @@ def get_recipe_search(session: SessionDep, query: str = ""):
 @router.get("/search/html", response_class=HTMLResponse)
 def get_search_html(session: SessionDep, query: str = ""):
     if query == "":
-        statement = select(recipe_model.Recipe).order_by(recipe_model.Recipe.name)
+        statement = select(recipe_model.Recipe).where(recipe_model.Recipe.hidden == False).order_by(recipe_model.Recipe.name)
     else:
-        statement = select(recipe_model.Recipe).where(or_(
-            func.lower(recipe_model.Recipe.name).contains(query.lower()),
-            func.lower(recipe_model.Recipe.ingredients).contains(query.lower())))
+        statement = select(recipe_model.Recipe).where(
+            recipe_model.Recipe.hidden == False,
+            or_(
+                func.lower(recipe_model.Recipe.name).contains(query.lower()),
+                func.lower(recipe_model.Recipe.ingredients).contains(query.lower())
+            ))
     results = session.exec(statement).all()
 
     if not results:
