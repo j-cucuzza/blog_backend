@@ -125,7 +125,7 @@ def get_recipe_search(session: SessionDep, query: str = ""):
     results = session.exec(statement).all()
 
     if not results:
-        raise HTTPException(status_code=404, detail="Recipe not found")
+        raise HTTPException(status_code=404, detail="Recipe(s) not found")
 
 
     return results
@@ -141,7 +141,7 @@ def get_search_html(session: SessionDep, query: str = ""):
     results = session.exec(statement).all()
 
     if not results:
-        return gen_html.generate_blank()
+        return gen_html.generate_blank_recipe()
     
     return gen_html.generate_recipes(results)
 

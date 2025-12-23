@@ -52,7 +52,7 @@ def generate_cuisines(cuisines: list[cuisine_model.Cuisine]):
     
     return gen_html
 
-def generate_blank():
+def generate_blank_recipe():
     gen_html = ""
 
     gen_html +=f"""
@@ -254,6 +254,53 @@ def generate_reviews(reviews: list[review_model.Review]):
             """
 
     return gen_html
+
+def generate_blank_review():
+    return f"""
+            <div class="cell">
+                <div class="card" style="height: 100%;">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <p class="title is-4">NOT FOUND</p>
+                        </div>
+                        <div class="card-header-icon">
+                                <div>
+                                    <div class="icon-text">
+                                        <span class="title is-6">
+                                            <span key={i} class="icon has-text-danger">
+                                                <i class="fa-solid fa-ban"></i>
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="content" min-height: 6rem;" >
+                            <div class="has-text-centered">
+                                <div>
+                                    
+                                </div>
+                            </div>
+                            <nav class="level">
+                                <div class="level-item has-text-centered">
+                                    <div>
+                                        <p class="title is-6">???</p>
+                                    </div>
+                                </div>
+                            </nav>
+                            <div class="has-text-centered">
+                                <span class="tag is-primary"><span class="title is-6">{review.cuisine.name.capitalize()}</span></span>
+                            </div>
+                        <br />
+                        <p>
+                            Try searching for something else!
+                        </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        """
 
 def generate_error_html():
     return """

@@ -1,5 +1,6 @@
 from typing import Annotated
 from sqlmodel import Session, select
+from sqlalchemy import func
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import HTMLResponse, JSONResponse
 from database import SessionDep, oauth2_scheme
@@ -50,6 +51,32 @@ def read_review(review_id: int, session: SessionDep):
         raise HTTPException(status_code=404, detail="Review not found")
     return review
 
+@router.get("/search/", response_model=list[review_model.ReviewPublicWithCuisine])
+def get_reviews(session: SessionDep, query: str = ""):
+    if query == "":
+        statement = select(review_model.Review).order_by(review_model.Review.name)
+    else:
+        statement = select(review_model.Review).where(func.lower(review_model.Review.name).contains(query.lower()))
+    results = session.exec(statement).all()
+
+    if not results:
+        raise HTTPException(status_code=404, detail="Review(s) not found")
+
+    return results
+
+@router.get("/search/html", response_class=HTMLResponse)
+def get_reviews_search(session: SessionDep, query: str = ""):
+    if query == "":
+        statement = select(review_model.Review).order_by(review_model.Review.name)
+    else:
+        statement = select(review_model.Review).where(func.lower(review_model.Review.name).contains(query.lower()))
+    results = session.exec(statement).all()
+
+    if not results:
+        return gen_html.generate_blank_review()
+    
+    return gen_html.generate_reviews(results)
+
 @router.post("/{review_id}", response_model=review_model.ReviewPublic)
 def update_review(token: Annotated[str, Depends(oauth2_scheme)],
     review_id: int,
@@ -79,7 +106,7 @@ def delete_review(token: Annotated[str, Depends(oauth2_scheme)],
     return {"ok": True}
 
 @router.get("/all/html", response_class=HTMLResponse)
-def get_recipes_html(session: SessionDep, cuisine: str = "all"):
+def get_reviews_html(session: SessionDep, cuisine: str = "all"):
     if cuisine == "all":
         statement = select(review_model.Review).order_by(review_model.Review.visited.desc(),
             review_model.Review.rating.desc(), review_model.Review.name)
